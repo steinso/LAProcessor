@@ -1,0 +1,19 @@
+{
+  "name": "LAProcessor-service",
+  "version": "0.1.0",
+  "description": "Learning Analytics Processor",
+  "author": "Stein Sorhus <stein.sorhus@gmail.com>",
+  "scripts": {
+    "test": "mocha",
+    "start": "node LAProcessorServer.js"
+  },
+  "dependencies": {
+    "express": "*"
+  },
+  "devDependencies": {
+    "mocha": "*",
+    "nodegit": "^0.2.7",
+    "request": "^2.53.0",
+    "should": "^5.0.1"
+  }
+}
