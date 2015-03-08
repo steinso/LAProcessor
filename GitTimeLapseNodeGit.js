@@ -43,8 +43,8 @@ var getCommitsFromRepo = function(repoPath){
 				console.log(watch.average(), "ms <- Generated commits for ",repoPath,commits.length);
 
 				resolve(commits);
-			},function(error){reject(error);});	
-		});
+			},function(error){reject(error);});
+		},function(error){reject(error);});
 	});
 };
 
