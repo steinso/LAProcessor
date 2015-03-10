@@ -1,4 +1,5 @@
 
+var Promise = require("es6-promise").Promise;
 var StateAnalytics = function(){
 
 	var getAnalyticsOfStates= function(states){

@@ -1,4 +1,5 @@
 
+var Promise = require("es6-promise").Promise;
 var GitFilesToObjectsConverter = function(){
 
 	var convert = function(commits){

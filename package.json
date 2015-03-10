@@ -11,6 +11,7 @@
     "express": "*"
   },
   "devDependencies": {
+    "es6-promise": "^2.0.1",
     "mocha": "*",
     "nodegit": "^0.2.7",
     "request": "^2.53.0",

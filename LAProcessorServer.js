@@ -5,8 +5,9 @@ var app = express();
 var Processor = require("./Processor.js");
 var gitConverter= require("./GitTimeLapseNodeGit.js");
 var Log = require("./Logger.js");
-var StateAnalytics = require("./StateAnalytics");
+var StateAnalytics = require("./StateAnalytics.js");
 var GitFilesToObjectsConverter = require("./GitFilesToObjectsConverter.js");
+var Promise = require("es6-promise").Promise;
 
 var fs = require("fs");
 
@@ -15,24 +16,28 @@ app.post("/processFiles", function(req, res){
 	var processor = new Processor();
 } );
 
-app.get("/client", function(req,res){
+app.get("/client", function(req, res){
 
 	var path = "/srv/LAHelper/logs/";
-	fs.readdir(path,function(err,files){
+	var clientList = [];
+	fs.readdir(path, function(err, files){
 
 		if(err){
-			res.send("ERROR: "+err);
+			res.send("ERROR: " + err);
 		}
 
-		var clientList = files.filter(function(file){
-			return fs.statSync(path+file).isDirectory();
-		});
+		if(files !== null && files.length > 0){
+			clientList = files.filter(function(file){
+				return fs.statSync(path + file).isDirectory();
+			});
+		}
+
 		res.send(clientList);
-	})
+	});
 
 });
 
-app.get("/client/:nickname",function(req,res){
+app.get("/client/:nickname", function(req, res){
 	var nickname = req.params.nickname;
 
 });
@@ -44,10 +49,12 @@ app.get("/repoTimelapse/:clientId",function(req,res){
 	var Commits= gitConverter.getCommitsFromRepo("/srv/LAHelper/logs/"+clientId);
 	//var Commits= gitConverter.getCommitsFromRepo("/srv/LAHelper/logs/78e6d96d44929f294d58d686dc07253416d748ec");
 	Commits.then(function(commits){
+		console.log('Got commits')
 		//console.log(commits);
 		GitFilesToObjectsConverter.convert(commits).then(function(states){
+			console.log('Got files to objects')
 			StateAnalytics.getAnalyticsOfStates(states).then(function(states){
-
+				console.log("Got analytics");
 				var returnedData = JSON.stringify(states);
 				res.send(returnedData);
 				log.debug("Success");
