@@ -8,6 +8,10 @@ var Log = require("./Logger.js");
 var StateAnalytics = require("./StateAnalytics.js");
 var GitFilesToObjectsConverter = require("./GitFilesToObjectsConverter.js");
 var Promise = require("es6-promise").Promise;
+var bodyParser = require("body-parser");
+
+
+app.use(bodyParser.json({limit:"10mb"}));
 
 var fs = require("fs");
 
@@ -16,67 +20,81 @@ app.post("/processFiles", function(req, res){
 	var processor = new Processor();
 } );
 
-app.get("/client", function(req, res){
+app.get("/commitList/:clientId", function(req, res){
 
-	var path = "/srv/LAHelper/logs/";
-	var clientList = [];
-	fs.readdir(path, function(err, files){
+	var clientId = req.params.clientId;
+	console.log("CommitLog request: " + clientId);
+	gitConverter.getCommitListFromRepo("/srv/LAHelper/logs/" + clientId).then(function(commitList){
 
-		if(err){
-			res.send("ERROR: " + err);
-		}
+		var response = {status: "OK", commitList: commitList};
+		res.send(JSON.stringify(response));
 
-		if(files !== null && files.length > 0){
-			clientList = files.filter(function(file){
-				return fs.statSync(path + file).isDirectory();
-			});
-		}
+	}, function(error){
+		var response = {status: "error", error: error };
+		res.send(JSON.stringify(response));
 
-		res.send(clientList);
 	});
-
 });
 
-app.get("/client/:nickname", function(req, res){
-	var nickname = req.params.nickname;
-
-});
-
-app.get("/repoTimelapse/:clientId",function(req,res){
+app.get("/repoTimelapse/:clientId", function(req, res){
 	//var commits = gitcommits.generatecommitsOfGitRepo("/srv/LAHelper/logs/597cd4dc32743cca14f26abc73dc994049018ea0");
 	var clientId = req.params.clientId;
-	console.log("Got request to server clientid: "+clientId);
-	var Commits= gitConverter.getCommitsFromRepo("/srv/LAHelper/logs/"+clientId);
+	var log = new Log("Timelapse request for: " + clientId);
+	var Commits = gitConverter.getCommitsFromRepo("/srv/LAHelper/logs/" + clientId);
 	//var Commits= gitConverter.getCommitsFromRepo("/srv/LAHelper/logs/78e6d96d44929f294d58d686dc07253416d748ec");
 	Commits.then(function(commits){
-		console.log('Got commits')
 		//console.log(commits);
 		GitFilesToObjectsConverter.convert(commits).then(function(states){
-			console.log('Got files to objects')
 			StateAnalytics.getAnalyticsOfStates(states).then(function(states){
-				console.log("Got analytics");
+
 				var returnedData = JSON.stringify(states);
 				res.send(returnedData);
-				log.debug("Success");
+				log.debug("Success: created analyzed timelapse");
 				log.print();
 			}, function(error){
 				console.log("Error: ", error);
-				res.send("Error: "+error);
+				log.print();
+				res.send("Error: " + error);
 			});
 
 		}, function(error){
 			console.log("Error: ", error);
-			res.send("Error: "+error);
-		}
-														);
+			log.print();
+			res.send("Error: " + error);
+		});
 
 	}, function(error){
-		res.send("Error : "+error);
+		res.send("Error : " + error);
 		log.error("Error");
 		log.print();
 	});
 
 
+});
+
+app.post('/process',function(req,res){
+	 
+	var clientId = req.params.clientId;
+	var commits = req.body.commits;
+	var log = new Log("Got process request: " + req.body.length + " states");
+
+		GitFilesToObjectsConverter.convert(commits).then(function(states){
+			StateAnalytics.getAnalyticsOfStates(states).then(function(states){
+				var returnedData = JSON.stringify(states);
+				res.send(returnedData);
+				log.debug("SUCCESS: States analyzed");
+				log.print();
+			}, function(error){
+				console.log("Error: ", error);
+				log.print();
+				res.send("Error: " + error);
+			});
+
+		}, function(error){
+			console.log("Error: ", error);
+			log.print();
+			res.send("Error: " + error);
+		});
 });
 
 var port = 50811;

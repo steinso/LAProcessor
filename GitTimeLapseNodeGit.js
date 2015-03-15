@@ -23,7 +23,7 @@ var Commit = function(){
 	this.time = 0;
 	this.sha = "";
 	this.msg = "";
-	this.files = []; //WHY CAN I NOT specify types FML
+	this.files = [];
 };
 
 var File = function(){
@@ -31,27 +31,58 @@ var File = function(){
 	this.fileContents = "";
 };
 
+var getCommitListFromRepo = function(repoPath){
+	console.log("Get commit list")
+	return new Promise(function(resolve, reject){
+		var commitList = [];
+		console.log("In promise")
+	
+		open(repoPath).then(function(repo) {
+			return repo.getMasterCommit();
+		})
+		.then(function(firstCommitOnMaster) {
+			// Create a new history event emitter.
+			var history = firstCommitOnMaster.history();
+
+			history.on("end",function(_commitObjs){
+				resolve(commitList);
+			});
+
+			history.on("error",function(error){
+				reject(error);
+			});
+
+			history.on("commit", function(commit) {
+				commitList.push(commit.sha());
+			});
+
+			// Start emitting events.
+			history.start();
+		});
+
+	});
+};
+
 
 var getCommitsFromRepo = function(repoPath){
-	return new Promise(function(resolve,reject){
+	return new Promise(function(resolve, reject){
 
 		var watch = timer.create("getCommits");
 		watch.start();
 
 		getFileListFromGitRepo(repoPath).then(function(files){
-			getFileCommits(repoPath,files).then(function(commits){
+			getFileCommits(repoPath, files).then(function(commits){
 				watch.stop();
-				console.log(watch.average(), "ms <- Generated commits for ",repoPath,commits.length);
+				console.log(watch.average(), "ms <- Generated commits for ", repoPath, commits.length);
 
 				resolve(commits);
-			},function(error){reject(error);});
-		},function(error){reject(error);});
+			}, function(error){reject(error); });
+		}, function(error){reject(error); });
 	});
 };
 
 // ls-files is not available through nodegit, so it must be fetched manually
 var getFileListFromGitRepo = function(dir){
-
 	return new Promise(function(resolve,reject){
 
 		exec("git ls-files",{cwd:dir},function(error,stdout,stderr){
@@ -110,8 +141,8 @@ var getFileCommits = function(repoPath,files){
 };
 
 
-var generateCommitObject = function(_commit,filesInRepo){
-	return new Promise(function(resolve,reject){
+var generateCommitObject = function(_commit, filesInRepo){
+	return new Promise(function(resolve, reject){
 
 		var commit = new Commit();
 		commit.time = _commit.date();
@@ -135,5 +166,6 @@ var generateCommitObject = function(_commit,filesInRepo){
 };
 
 module.exports = {
-	getCommitsFromRepo:getCommitsFromRepo
+	getCommitsFromRepo: getCommitsFromRepo,
+	getCommitListFromRepo: getCommitListFromRepo
 };

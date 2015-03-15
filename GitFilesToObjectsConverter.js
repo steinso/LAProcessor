@@ -1,5 +1,12 @@
 
 var Promise = require("es6-promise").Promise;
+
+/**
+ * Converts commit objects to files object, that includes
+ * storing relevant markers for each file inside the file object
+ * instead of seperate files.
+ */
+
 var GitFilesToObjectsConverter = function(){
 
 	var convert = function(commits){
@@ -27,21 +34,14 @@ var GitFilesToObjectsConverter = function(){
 					var file = {};
 					file.name = _file.name;
 					file.fileContents = _file.fileContents;
+					// Find markers and tests for file
 					file.markers = markers.getMarkersForFile(_file);
 					file.tests = tests.getTestsForFile(_file);
-					if(file.tests.length>0){
-						//console.log("Found tests for file: "+file.name," - state #: ",states.length);
-					}
-
-					if(file.markers.length>0){
-						//console.log("Found markers for file: "+file.name," - state #: ",states.length);
-					}
 
 					state.files.push(file);
 				});
 			});
 
-			
 			//Must reverse the array, as pushing makes last commit end up in front
 			resolve(states.reverse());
 			} catch(e){
