@@ -76,7 +76,7 @@ app.post('/process',function(req,res){
 	 
 	var clientId = req.params.clientId;
 	var commits = req.body.commits;
-	var log = new Log("Got process request: " + req.body.length + " states");
+	var log = new Log("unknown","Got process request: " + req.body.commits.length + " states");
 
 		GitFilesToObjectsConverter.convert(commits).then(function(states){
 			StateAnalytics.getAnalyticsOfStates(states).then(function(states){
