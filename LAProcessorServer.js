@@ -43,7 +43,7 @@ app.get("/repoTimelapse/:clientId", function(req, res){
 	var Commits = gitConverter.getCommitsFromRepo("/srv/LAHelper/logs/" + clientId);
 	//var Commits= gitConverter.getCommitsFromRepo("/srv/LAHelper/logs/78e6d96d44929f294d58d686dc07253416d748ec");
 	Commits.then(function(commits){
-		//console.log(commits);
+		console.log(commits);
 		GitFilesToObjectsConverter.convert(commits).then(function(states){
 			StateAnalytics.getAnalyticsOfStates(states).then(function(states){
 

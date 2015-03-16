@@ -49,7 +49,7 @@ var StateAnalytics = function(){
 	};
 
 	var getPackageName = function(file){
-		var packageMatch = file.fileContents.match(/\s*package (\w+);/);
+		var packageMatch = file.fileContents.match(/\s*package ([\w|\.]+);/);
 		var packageName = NOT_FOUND;
 
 		if(packageMatch !== null && packageMatch[1] !== null){
@@ -59,14 +59,14 @@ var StateAnalytics = function(){
 	};
 
 	var getType = function(file){
-		var classMatch = file.fileContents.match(/\s+public class (\w+)/);
+		var classMatch = file.fileContents.match(/\s*public class (\w+)/);
 
-		var interfaceMatch = file.fileContents.match(/\s+public interface (\w+)/);
-		if(classMatch !== undefined){
+		var interfaceMatch = file.fileContents.match(/\s*public interface (\w+)/);
+		if(classMatch !== null){
 			return "class";
 		}
 
-		if(interfaceMatch !== undefined){
+		if(interfaceMatch !== null){
 			return "interface";
 		}
 
@@ -75,7 +75,7 @@ var StateAnalytics = function(){
 
 	var getContentName = function(file){
 
-		var classMatch = file.fileContents.match(/\s+public class (\w+)/);
+		var classMatch = file.fileContents.match(/\s*public (?:class|interface) (\w+)/);
 		var className = NOT_FOUND;
 
 		if(classMatch !== null && classMatch[1] !== null){
