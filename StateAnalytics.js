@@ -40,11 +40,18 @@ var StateAnalytics = function(){
 	};
 
 	var getFailedTestsCount = function(file){
-		return file.tests.reduce(function(p, c){if(c.result === "Failure"){return p + 1; }}, 0);
+		var failedTests = "?";
+		if(file.tests !== undefined && file.tests.length !== undefined){
+			failedTests = file.tests.reduce(function(p, c){if(c.result === "Failure" || c.result === "Error"){return p + 1; }}, 0);
+	}
+		return failedTests;
 
 	};
 
 	var getTotalTestsCount = function(file){
+		if(file.tests === undefined || file.tests.length === undefined){
+			return "?";
+		}
 		return file.tests.length;
 	};
 
