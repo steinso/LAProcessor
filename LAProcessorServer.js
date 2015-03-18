@@ -11,7 +11,7 @@ var Promise = require("es6-promise").Promise;
 var bodyParser = require("body-parser");
 
 
-app.use(bodyParser.json({limit:"10mb"}));
+app.use(bodyParser.json({limit:"1000mb"}));
 
 var fs = require("fs");
 
