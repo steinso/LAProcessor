@@ -10,7 +10,7 @@ var manualCategories = [
 	{
 		name: "StockListener",
 		type: "Observer-technique",
-		package: "patterns.patterns",
+		package: "patterns.observable",
 		files: {
 			"interface": ["StockListener"],
 			"class": ["SmartStock", "StockIndex", "Stock"]
@@ -47,7 +47,7 @@ var FileCategories = function(){
 		categories.forEach(function(category){
 			if(file.type === undefined){return; }
 			if(category.files[file.type] !== undefined && category.files[file.type].indexOf(file.contentName) >= 0){
-				manualCategories.push(category);
+				matchingCategories.push(category);
 			}
 		});
 

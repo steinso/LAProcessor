@@ -40,16 +40,23 @@ var StateAnalytics = function(){
 	};
 
 	var getFailedTestsCount = function(file){
-		return file.tests.reduce(function(p, c){if(c.result === "Failure"){return p + 1; }}, 0);
+		var failedTests = "?";
+		if(file.tests !== undefined && file.tests.length !== undefined){
+			failedTests = file.tests.reduce(function(p, c){if(c.result === "Failure" || c.result === "Error"){return p + 1; }}, 0);
+	}
+		return failedTests;
 
 	};
 
 	var getTotalTestsCount = function(file){
+		if(file.tests === undefined || file.tests.length === undefined){
+			return "?";
+		}
 		return file.tests.length;
 	};
 
 	var getPackageName = function(file){
-		var packageMatch = file.fileContents.match(/\s*package (\w+);/);
+		var packageMatch = file.fileContents.match(/\s*package ([\w|\.]+);/);
 		var packageName = NOT_FOUND;
 
 		if(packageMatch !== null && packageMatch[1] !== null){
@@ -59,14 +66,14 @@ var StateAnalytics = function(){
 	};
 
 	var getType = function(file){
-		var classMatch = file.fileContents.match(/\s+public class (\w+)/);
+		var classMatch = file.fileContents.match(/\s*public class (\w+)/);
 
-		var interfaceMatch = file.fileContents.match(/\s+public interface (\w+)/);
-		if(classMatch !== undefined){
+		var interfaceMatch = file.fileContents.match(/\s*public interface (\w+)/);
+		if(classMatch !== null){
 			return "class";
 		}
 
-		if(interfaceMatch !== undefined){
+		if(interfaceMatch !== null){
 			return "interface";
 		}
 
@@ -75,7 +82,7 @@ var StateAnalytics = function(){
 
 	var getContentName = function(file){
 
-		var classMatch = file.fileContents.match(/\s+public class (\w+)/);
+		var classMatch = file.fileContents.match(/\s*public (?:class|interface) (\w+)/);
 		var className = NOT_FOUND;
 
 		if(classMatch !== null && classMatch[1] !== null){
