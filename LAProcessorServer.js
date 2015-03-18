@@ -9,6 +9,7 @@ var StateAnalytics = require("./StateAnalytics.js");
 var GitFilesToObjectsConverter = require("./GitFilesToObjectsConverter.js");
 var Promise = require("es6-promise").Promise;
 var bodyParser = require("body-parser");
+var Timer = require("./Timer.js");
 
 
 app.use(bodyParser.json({limit:"1000mb"}));
@@ -77,12 +78,15 @@ app.post('/process',function(req,res){
 	var clientId = req.params.clientId;
 	var commits = req.body.commits;
 	var log = new Log("unknown","Got process request: " + req.body.commits.length + " states");
+	var timer = Timer.create("Process");
+	timer.start();
 
 		GitFilesToObjectsConverter.convert(commits).then(function(states){
 			StateAnalytics.getAnalyticsOfStates(states).then(function(states){
 				var returnedData = JSON.stringify(states);
 				res.send(returnedData);
-				log.debug("SUCCESS: States analyzed");
+				timer.stop();
+				log.debug("SUCCESS: States analyzed in: "+timer.getLast());
 				log.print();
 			}, function(error){
 				console.log("Error: ", error);
