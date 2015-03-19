@@ -23,11 +23,19 @@ var StateAnalytics = function(){
 					file.contentName = getContentName(file);
 					file.categories = getCategoryRelations(file);
 				});
+
+				state.files.filter(function(file){
+					return _isValidFile(file);
+				});
 			});
 
 			resolve(states);
 		});
 	};
+
+	var _isValidFile = function(file){
+		return file.numberOfLines >0;
+	}
 
 	var getLineCount = function(file){
 		if(file !== undefined){
