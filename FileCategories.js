@@ -185,7 +185,7 @@ var manualCategories = [
 	},{
 		name: "StockListener",
 		type: "Observatør-teknikken",
-		package: "patterns.patterns",
+		package: "patterns.patterns|patterns.observable",
 		files: {
 			"interface": ["StockListener"],
 			"class": ["SmartStock", "StockIndex", "Stock"]
@@ -193,7 +193,7 @@ var manualCategories = [
 	},{
 		name: "HighscoreList",
 		type: "Observatør-teknikken",
-		package: "patterns.patterns",
+		package: "patterns.patterns|patterns.observable",
 		files: {
 			"interface": ["HighScoreListListener"],
 			"class": ["HighScoreList","HighScoreListProgram"]
@@ -252,7 +252,7 @@ var FileCategories = function(){
 
 		categories.forEach(function(category){
 			if(file.type === undefined){return; }
-			if(category.files[file.type] !== undefined && category.files[file.type].indexOf(file.contentName) >= 0){
+			if(category.files[file.type] !== undefined && category.files[file.type].indexOf(file.contentName) >= 0 && file.packageName.match(category.package) !== null){
 				matchingCategories.push(category);
 			}
 		});
