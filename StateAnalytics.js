@@ -24,7 +24,7 @@ var StateAnalytics = function(){
 					file.categories = getCategoryRelations(file);
 				});
 
-				state.files.filter(function(file){
+				state.files = state.files.filter(function(file){
 					return _isValidFile(file);
 				});
 			});
