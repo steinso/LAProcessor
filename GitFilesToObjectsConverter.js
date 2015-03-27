@@ -1,4 +1,4 @@
-
+"use strict";
 var type = require("typed");
 var Promise = require("es6-promise").Promise;
 
@@ -15,6 +15,7 @@ var Promise = require("es6-promise").Promise;
 var GitFilesToObjectsConverter = function(){
 
 	var convert = function(commits){
+		type.ofInput({"Array<Commit>":commits});
 
 		var filesMissingMarkers = 0;
 		var markersRetrievedFromNext = 0;
@@ -36,7 +37,7 @@ var GitFilesToObjectsConverter = function(){
 					console.log("Noe files.."+commit.sha);
 					return;}
 
-				var state = {};
+				var state = type.create("RepoState");
 				state.files = [];
 				state.time = commit.time;
 				state.commitSha = commit.sha;
@@ -87,7 +88,7 @@ var GitFilesToObjectsConverter = function(){
 				var relevantFiles = getRelevantFiles(commit.files);
 
 				relevantFiles.map(function(_file){
-					var file = {};
+					var file = type.create("StateFile");
 					file.name = _file.name;
 					file.fileContents = _file.fileContents;
 
@@ -134,7 +135,7 @@ var GitFilesToObjectsConverter = function(){
 					}
 					*/
 					if(file.foundTests){
-						console.log("Found tests; ", file.tests);
+						//console.log("Found tests; ", file.tests);
 					}
 
 					fileMarkers[file.name] = file.markers;
@@ -147,7 +148,6 @@ var GitFilesToObjectsConverter = function(){
 			console.log("Got markers from next: ", markersRetrievedFromNext)
 			console.log("States missong markers: ", filesMissingMarkers)
 
-			
 			console.log("Got tests from next: ", testsRetrievedFromNext)
 			console.log("States missong tests: ", filesMissingTests)
 			console.log("States containing tests: ",statesContainingTestsFiles)
@@ -162,10 +162,13 @@ var GitFilesToObjectsConverter = function(){
 	};
 
 	var getRelevantFiles = function(files){
+		type.ofInput({"Array<File>":files})
 		return files.filter(function(file){if(file.name.match(/\.markers\.json/) == null && file.name.match(/\.tests\.json/) == null){return true;}});
 	};	
 
 	var getFilesByNameRegex = function(fileList,fileNameRegex){
+		type.ofInput({"Array<File>": fileList, "RegExp": fileNameRegex});
+
 		var files = fileList.filter(function(file){
 
 			var match = file.name.match(fileNameRegex);
@@ -176,6 +179,8 @@ var GitFilesToObjectsConverter = function(){
 		return  files || [];
 	};
 	var getFileByName = function(files,fileName){
+		type.ofInput({"Array<File>": files, "String": fileName});
+
 		var file = files.filter(function(file){if(file.name === fileName){return file;}})[0];
 		return  file || {};
 	};
@@ -209,10 +214,17 @@ var Markers = function(markersFile){
 				if(markersPrFile[fileName] === undefined){
 					markersPrFile[fileName] = [];
 				}
-				markersPrFile[fileName].push.apply(markersPrFile[fileName], markers.listOfMarkers[fileName]);
+				var markerList = markers.listOfMarkers[fileName];
+				//type.check("Array<FileMarker>", markerList);
+				//Optional fields not supported in Typed yet
+				//Extend current array with new markers array
+				markersPrFile[fileName].push.apply(markersPrFile[fileName],markerList);
 			});
 
 		}catch(e){
+			if(e instanceof TypeError){
+				throw e;
+			}
 			console.log("Could not parse markers JSON");
 		}
 	};
@@ -255,9 +267,13 @@ var Tests = function(testsFile){
 					testsPrClass[test.className] = []; 
 				}
 
+				type.check("FileTest",test);
 				testsPrClass[test.className].push(test);	
 			});
 		}catch(e){
+			if(e instanceof TypeError){
+				throw e;
+			}
 			console.log("Could not parse test JSON",testsFile);
 		}
 
