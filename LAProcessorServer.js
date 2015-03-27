@@ -10,6 +10,7 @@ var GitFilesToObjectsConverter = require("./GitFilesToObjectsConverter.js");
 var Promise = require("es6-promise").Promise;
 var bodyParser = require("body-parser");
 var Timer = require("./Timer.js");
+var initTypes = require("./Types.js");
 
 
 app.use(bodyParser.json({limit:"1000mb"}));

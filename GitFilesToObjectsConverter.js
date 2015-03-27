@@ -1,21 +1,41 @@
 
+var type = require("typed");
 var Promise = require("es6-promise").Promise;
 
 /**
  * Converts commit objects to files object, that includes
  * storing relevant markers for each file inside the file object
  * instead of seperate files.
+ *
+ * Since markers are sometimes sent after the files, it 
+ * ends up in the next commit, IF this happens, we retrieve it.
+ *
  */
 
 var GitFilesToObjectsConverter = function(){
 
 	var convert = function(commits){
+
+		var filesMissingMarkers = 0;
+		var markersRetrievedFromNext = 0;
+		var filesMissingTests= 0;
+		var testsRetrievedFromNext = 0;
+		var statesContainingTestsFiles = 0;
+
 		// Extends the input object
 		return new Promise(function(resolve,reject){
 			try{
 			var states = [];
+			// Sort commits first
+			commits = commits.sort(function(a,b){return b.time - a.time;})
 
-			commits.map(function(commit){
+			commits.map(function(commit, index){
+
+				// Skip commits with no file changes
+				if(commit.files.length === 0){
+					console.log("Noe files.."+commit.sha);
+					return;}
+
 				var state = {};
 				state.files = [];
 				state.time = commit.time;
@@ -24,8 +44,44 @@ var GitFilesToObjectsConverter = function(){
 				states.push(state);
 
 				var markersFiles =getFilesByNameRegex(commit.files,/\.markers\.json/);
-				var markers = new Markers(markersFiles);
 				var testsFiles = getFilesByNameRegex(commit.files,/\.tests\.json/);
+
+				//No markers were found, check next commit
+				if(markersFiles.length===0){
+					var nextCommit = commits[index+1];
+					if(nextCommit !== undefined){
+						var timeDiff = nextCommit.time - commit.time;
+
+						if(timeDiff <= 1900){
+							markersRetrievedFromNext++;
+							markersFiles =getFilesByNameRegex(nextCommit.files,/\.markers\.json/);
+						}
+					}
+				}
+				if(markersFiles.length === 0){
+					filesMissingMarkers++;
+				}
+				
+				if(testsFiles.length>0){
+					statesContainingTestsFiles++;
+				}
+
+				if(testsFiles.length===0){
+					var nextCommit = commits[index+1];
+					if(nextCommit !== undefined){
+						var timeDiff = nextCommit.time - commit.time;
+
+						if(timeDiff <= 1900){
+							testsRetrievedFromNext++;
+							testsFiles =getFilesByNameRegex(nextCommit.files,/\.tests\.json/);
+						}
+					}
+				}
+				if(testsFiles.length === 0){
+					filesMissingTests++;
+				}
+
+				var markers = new Markers(markersFiles);
 				var tests = new Tests(testsFiles);
 
 				var relevantFiles = getRelevantFiles(commit.files);
@@ -34,16 +90,69 @@ var GitFilesToObjectsConverter = function(){
 					var file = {};
 					file.name = _file.name;
 					file.fileContents = _file.fileContents;
+
 					// Find markers and tests for file
 					file.markers = markers.getMarkersForFile(_file);
 					file.tests = tests.getTestsForFile(_file);
+					file.foundMarkers = true;
+					file.foundTests = true;
+
+					// If markers file was not changed in commit,
+					// it must be the same as last time
+					if(markersFiles.length === 0){
+						file.foundMarkers = false;
+					}
+
+					if(testsFiles.length === 0){
+						file.foundTests = false;
+					}
 
 					state.files.push(file);
 				});
 			});
 
+			// Ensure that markers are added to file state where
+			// the markers file have not explicitly been edited
+			var fileMarkers = {};
+			var fileTests = {};
+			states.map(function(state){
+				state.files.map(function(file, index){
+					if(!file.foundMarkers){
+						if(fileMarkers[file.name] === undefined){
+							file.markers = [];
+						}else{
+							file.markers = fileMarkers[file.name];
+						}
+					}
+/*
+					if(!file.foundTests){
+						if(fileTests[file.name] === undefined){
+							file.tests = [];
+						}else{
+							file.tests = fileTests[file.name];
+						}
+					}
+					*/
+					if(file.foundTests){
+						console.log("Found tests; ", file.tests);
+					}
+
+					fileMarkers[file.name] = file.markers;
+					//fileTests[file.name] = file.tests;
+				});
+			});
+			console.log(fileTests);
+
 			//Must reverse the array, as pushing makes last commit end up in front
-			resolve(states.reverse());
+			console.log("Got markers from next: ", markersRetrievedFromNext)
+			console.log("States missong markers: ", filesMissingMarkers)
+
+			
+			console.log("Got tests from next: ", testsRetrievedFromNext)
+			console.log("States missong tests: ", filesMissingTests)
+			console.log("States containing tests: ",statesContainingTestsFiles)
+
+			resolve(states);
 			} catch(e){
 				console.trace();
 				console.error("Caught it ");

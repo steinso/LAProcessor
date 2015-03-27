@@ -50,7 +50,13 @@ var StateAnalytics = function(){
 	var getFailedTestsCount = function(file){
 		var failedTests = "?";
 		if(file.tests !== undefined && file.tests.length !== undefined){
-			failedTests = file.tests.reduce(function(p, c){if(c.result === "Failure" || c.result === "Error"){return p + 1; }}, 0);
+
+			failedTests = file.tests.reduce(function(p, c){
+				if(c.result === "Failure" || c.result === "Error"){
+					return p + 1;
+				}
+				return p;
+			}, 0);
 	}
 		return failedTests;
 
