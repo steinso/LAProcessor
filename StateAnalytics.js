@@ -1,6 +1,7 @@
-
+"use strict";
 var Promise = require("es6-promise").Promise;
 var FileCategories = require("./FileCategories.js");
+var type = require("typed");
 
 var StateAnalytics = function(){
 	var NOT_FOUND = "NotFound";
@@ -9,19 +10,24 @@ var StateAnalytics = function(){
 		// Extends the input object
 		return new Promise(function(resolve, reject){
 
-
-
 			states.map(function(state){
 
-				state.files.map(function(file){
-					file.numberOfLines = getLineCount(file);
-					file.numberOfMarkers = getMarkerCount(file);
-					file.numberOfFailedTests = getFailedTestsCount(file);
-					file.numberOfTests = getTotalTestsCount(file);
-					file.packageName = getPackageName(file);
-					file.type = getType(file);
-					file.contentName = getContentName(file);
-					file.categories = getCategoryRelations(file);
+				state.files = state.files.map(function(file){
+					var analyticsFile = type.create("FileAnalytics");
+					analyticsFile.name = file.name;
+					analyticsFile.markers = file.markers; 
+					analyticsFile.tests = file.tests;
+					analyticsFile.foundTests = file.foundTests;
+					analyticsFile.foundMarkers= file.foundMarkers;
+					analyticsFile.numberOfLines = getLineCount(file);
+					analyticsFile.numberOfMarkers = getMarkerCount(file);
+					analyticsFile.numberOfFailedTests = getFailedTestsCount(file);
+					analyticsFile.numberOfTests = getTotalTestsCount(file);
+					analyticsFile.packageName = getPackageName(file);
+					analyticsFile.type = getType(file);
+					analyticsFile.contentName = getContentName(file);
+					analyticsFile.categories = getCategoryRelations(file);
+					return analyticsFile;
 				});
 
 				state.files = state.files.filter(function(file){
