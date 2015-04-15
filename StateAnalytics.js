@@ -26,7 +26,9 @@ var StateAnalytics = function(){
 					analyticsFile.packageName = getPackageName(file);
 					analyticsFile.type = getType(file);
 					analyticsFile.contentName = getContentName(file);
-					analyticsFile.categories = getCategoryRelations(file);
+
+					//Note: depends on already gathered information
+					analyticsFile.categories = getCategoryRelations(analyticsFile);
 					return analyticsFile;
 				});
 
