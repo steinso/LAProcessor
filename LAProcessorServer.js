@@ -74,20 +74,31 @@ app.get("/repoTimelapse/:clientId", function(req, res){
 
 });
 
-app.post('/process',function(req,res){
-	 
+/**
+ * Returns {
+ * 	states: [states],
+ * 	tests: [tests]
+ * }
+ **/
+app.post("/process", function(req, res){
+
 	var clientId = req.params.clientId;
 	var commits = req.body.commits;
-	var log = new Log("unknown","Got process request: " + req.body.commits.length + " states");
+	var log = new Log("unknown", "Got process request: " + req.body.commits.length + " states");
 	var timer = Timer.create("Process");
 	timer.start();
 
-		GitFilesToObjectsConverter.convert(commits).then(function(states){
-			StateAnalytics.getAnalyticsOfStates(states).then(function(states){
-				var returnedData = JSON.stringify(states);
-				res.send(returnedData);
+		GitFilesToObjectsConverter.convert(commits).then(function(result){
+			StateAnalytics.getAnalyticsOfStates(result.states).then(function(states){
+
+				var returnedData = {
+					states: states,
+					tests: result.tests
+				};
+
+				res.send(JSON.stringify(returnedData));
 				timer.stop();
-				log.debug("SUCCESS: States analyzed in: "+timer.getLast());
+				log.debug("SUCCESS: States analyzed in: " + timer.getLast());
 				log.print();
 			}, function(error){
 				console.log("Error: ", error);

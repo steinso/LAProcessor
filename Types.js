@@ -32,6 +32,14 @@ type.add("FileTest", {
 	result: "String"
 });
 
+type.add("StateTest", {
+	time: "Number",
+	contentName: "String",
+	packageName: "String",
+	methodName: "String",
+	result: "String"
+});
+
 type.add("StateFile", {
 	name: "String",
 	fileContents: "String",

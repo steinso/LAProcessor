@@ -1,7 +1,6 @@
 "use strict";
 var type = require("typed");
 var Promise = require("es6-promise").Promise;
-
 /**
  * Converts commit objects to files object, that includes
  * storing relevant markers for each file inside the file object
@@ -14,28 +13,31 @@ var Promise = require("es6-promise").Promise;
 
 var GitFilesToObjectsConverter = function(){
 
+	var filesMissingMarkers = 0;
+	var markersRetrievedFromNext = 0;
+	var filesMissingTests= 0;
+	var testsRetrievedFromNext = 0;
+	var statesContainingTestsFiles = 0;
+	var testStore = new TestStore();
+
 	var convert = function(commits){
 		type.ofInput({"Array<Commit>":commits});
 
-		var filesMissingMarkers = 0;
-		var markersRetrievedFromNext = 0;
-		var filesMissingTests= 0;
-		var testsRetrievedFromNext = 0;
-		var statesContainingTestsFiles = 0;
 
 		// Extends the input object
-		return new Promise(function(resolve,reject){
+		return new Promise(function(resolve, reject){
 			try{
 			var states = [];
 			// Sort commits first
-			commits = commits.sort(function(a,b){return b.time - a.time;})
+			commits = commits.sort(function(a, b){return b.time - a.time;});
 
 			commits.map(function(commit, index){
 
 				// Skip commits with no file changes
 				if(commit.files.length === 0){
-					console.log("Noe files.."+commit.sha);
-					return;}
+					console.log("Noe files.." + commit.sha);
+					return;
+				}
 
 				var state = type.create("RepoState");
 				state.files = [];
@@ -44,8 +46,7 @@ var GitFilesToObjectsConverter = function(){
 				state.commitMsg = commit.msg;
 				states.push(state);
 
-				var markersFiles =getFilesByNameRegex(commit.files,/\.markers\.json/);
-				var testsFiles = getFilesByNameRegex(commit.files,/\.tests\.json/);
+				var markersFiles = getFilesByNameRegex(commit.files, /\.markers\.json/);
 
 				//No markers were found, check next commit
 				if(markersFiles.length===0){
@@ -62,28 +63,10 @@ var GitFilesToObjectsConverter = function(){
 				if(markersFiles.length === 0){
 					filesMissingMarkers++;
 				}
-				
-				if(testsFiles.length>0){
-					statesContainingTestsFiles++;
-				}
 
-				if(testsFiles.length===0){
-					var nextCommit = commits[index+1];
-					if(nextCommit !== undefined){
-						var timeDiff = nextCommit.time - commit.time;
-
-						if(timeDiff <= 1900){
-							testsRetrievedFromNext++;
-							testsFiles =getFilesByNameRegex(nextCommit.files,/\.tests\.json/);
-						}
-					}
-				}
-				if(testsFiles.length === 0){
-					filesMissingTests++;
-				}
+				_storeTestFiles(commit);
 
 				var markers = new Markers(markersFiles);
-				var tests = new Tests(testsFiles);
 
 				var relevantFiles = getRelevantFiles(commit.files);
 
@@ -94,18 +77,13 @@ var GitFilesToObjectsConverter = function(){
 
 					// Find markers and tests for file
 					file.markers = markers.getMarkersForFile(_file);
-					file.tests = tests.getTestsForFile(_file);
 					file.foundMarkers = true;
-					file.foundTests = true;
+					file.foundTests = false;
 
 					// If markers file was not changed in commit,
 					// it must be the same as last time
 					if(markersFiles.length === 0){
 						file.foundMarkers = false;
-					}
-
-					if(testsFiles.length === 0){
-						file.foundTests = false;
 					}
 
 					state.files.push(file);
@@ -115,7 +93,6 @@ var GitFilesToObjectsConverter = function(){
 			// Ensure that markers are added to file state where
 			// the markers file have not explicitly been edited
 			var fileMarkers = {};
-			var fileTests = {};
 			states.map(function(state){
 				state.files.map(function(file, index){
 					if(!file.foundMarkers){
@@ -125,24 +102,10 @@ var GitFilesToObjectsConverter = function(){
 							file.markers = fileMarkers[file.name];
 						}
 					}
-/*
-					if(!file.foundTests){
-						if(fileTests[file.name] === undefined){
-							file.tests = [];
-						}else{
-							file.tests = fileTests[file.name];
-						}
-					}
-					*/
-					if(file.foundTests){
-						//console.log("Found tests; ", file.tests);
-					}
 
 					fileMarkers[file.name] = file.markers;
-					//fileTests[file.name] = file.tests;
 				});
 			});
-			console.log(fileTests);
 
 			//Must reverse the array, as pushing makes last commit end up in front
 			console.log("Got markers from next: ", markersRetrievedFromNext)
@@ -150,15 +113,35 @@ var GitFilesToObjectsConverter = function(){
 
 			console.log("Got tests from next: ", testsRetrievedFromNext)
 			console.log("States missong tests: ", filesMissingTests)
-			console.log("States containing tests: ",statesContainingTestsFiles)
+			console.log("States containing tests: ",statesContainingTestsFiles);
 
-			resolve(states);
+			console.log("Applying tests");
+
+			resolve({
+				states: states,
+				tests: testStore.getTests()
+			});
+
 			} catch(e){
 				console.trace();
 				console.error("Caught it ");
 				reject(Error(e));
 			}
 		});
+	};
+
+	var _storeTestFiles = function(commit){
+
+		var testsFiles = getFilesByNameRegex(commit.files, /\.tests\.json/);
+
+		if(testsFiles.length > 0){
+			statesContainingTestsFiles++;
+			testsFiles.forEach(function(file){
+				testStore.parseFile(file, commit.time);
+			});
+		} else {
+			filesMissingTests++;
+		}
 	};
 
 	var getRelevantFiles = function(files){
@@ -186,9 +169,11 @@ var GitFilesToObjectsConverter = function(){
 	};
 
 	return{
-		convert:convert
+		convert: convert
 	};
 };
+
+
 
 
 var Markers = function(markersFile){
@@ -242,72 +227,53 @@ var Markers = function(markersFile){
 
 	_constructor(markersFile);
 
-	return{
-		getMarkersForFile:getMarkersForFile
+	return {
+		getMarkersForFile: getMarkersForFile
 	};
 };
 
-var Tests = function(testsFile){
+var TestStore = function(){
 
-	var testsPrClass = {};
+	var tests = [];
 
-	var _constructor = function(testsFiles){
-		testsFiles.map(parseFile);
-	};
-
-	var parseFile = function(testsFile){
+	var parseFile = function(testsFile, timeStamp){
 
 		try{
 			if(testsFile === undefined || testsFile.fileContents.length < 1){return;}
-			var tests = JSON.parse(testsFile.fileContents);
-			tests.map(function(test){
-				//No need for array, multiple files should reflect same value, otherwise it is a bug
-				//TODO: could check time of file to only store most recent updated test
-				if(testsPrClass[test.className] == undefined){
-					testsPrClass[test.className] = []; 
+			var _tests = JSON.parse(testsFile.fileContents);
+			_tests.forEach(function(test){
+				type.check("FileTest", test);
+
+				var stateTest = type.create("StateTest");
+
+				stateTest.time = timeStamp;
+				stateTest.methodName = test.methodName;
+				stateTest.result = test.result;
+
+				//Assume all test classes end in Test
+				var seperatePackageAndClass = test.className.match(/^(\w+)\.(\w+)Test$/);
+				if(seperatePackageAndClass === null){
+					console.log("Not recognisable test:  "+test.className);
+					return;
 				}
 
-				type.check("FileTest",test);
-				testsPrClass[test.className].push(test);	
+				stateTest.packageName = seperatePackageAndClass[1];
+				stateTest.contentName = seperatePackageAndClass[2];
+
+				tests.push(stateTest);
 			});
 		}catch(e){
 			if(e instanceof TypeError){
 				throw e;
 			}
-			console.log("Could not parse test JSON",testsFile);
+			console.log("Could not parse test JSON", testsFile);
 		}
 
 	};
 
-	var getTestsForFile = function(file){
-
-		if(file === undefined){
-			return [];
-		}
-		var packageMatch = file.fileContents.match(/\s*package (\w+);/);
-		var classMatch= file.fileContents.match(/\s+public class (\w+)/);
-		var packageName = null;
-		var className = null;
-
-		if(packageMatch !== null && packageMatch[1] !==null){
-			packageName = packageMatch[1];
-		}
-
-		if(classMatch !== null && classMatch[1] !==null){
-			className = classMatch[1];
-		}
-
-		//console.log("Getting tests for file:",file.name,packageName+"."+className+"Test",Object.keys(testsPrClass));
-		if(testsPrClass[packageName+"."+className+"Test"] !== undefined){
-			return testsPrClass[packageName+"."+className+"Test"];
-		}
-		return [];
-	};
-
-	_constructor(testsFile);
-
-	return{
-		getTestsForFile:getTestsForFile
+	return {
+		parseFile: parseFile,
+		getTests: function(){return tests;}
 	};
 };
 module.exports = new GitFilesToObjectsConverter();
