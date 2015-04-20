@@ -1,12 +1,15 @@
 "use strict";
 var type = require("typed");
 var Promise = require("es6-promise").Promise;
+var TestHandler = require("./TestHandler.js");
+var MarkerHandler = require("./MarkerHandler.js");
+
 /**
  * Converts commit objects to files object, that includes
  * storing relevant markers for each file inside the file object
  * instead of seperate files.
  *
- * Since markers are sometimes sent after the files, it 
+ * Since markers are sometimes sent after the files, it
  * ends up in the next commit, IF this happens, we retrieve it.
  *
  */
@@ -15,13 +18,13 @@ var GitFilesToObjectsConverter = function(){
 
 	var filesMissingMarkers = 0;
 	var markersRetrievedFromNext = 0;
-	var filesMissingTests= 0;
+	var filesMissingTests = 0;
 	var testsRetrievedFromNext = 0;
 	var statesContainingTestsFiles = 0;
-	var testStore = new TestStore();
+	var testHandler = new TestHandler();
 
 	var convert = function(commits){
-		type.ofInput({"Array<Commit>":commits});
+		type.ofInput({"Array<Commit>": commits});
 
 
 		// Extends the input object
@@ -35,7 +38,7 @@ var GitFilesToObjectsConverter = function(){
 
 				// Skip commits with no file changes
 				if(commit.files.length === 0){
-					console.log("Noe files.." + commit.sha);
+					console.log("Commit contains no files.." + commit.sha);
 					return;
 				}
 
@@ -56,7 +59,7 @@ var GitFilesToObjectsConverter = function(){
 
 						if(timeDiff <= 1900){
 							markersRetrievedFromNext++;
-							markersFiles =getFilesByNameRegex(nextCommit.files,/\.markers\.json/);
+							markersFiles = getFilesByNameRegex(nextCommit.files, /\.markers\.json/);
 						}
 					}
 				}
@@ -66,7 +69,7 @@ var GitFilesToObjectsConverter = function(){
 
 				_storeTestFiles(commit);
 
-				var markers = new Markers(markersFiles);
+				var markers = new MarkerHandler(markersFiles);
 
 				var relevantFiles = getRelevantFiles(commit.files);
 
@@ -108,18 +111,18 @@ var GitFilesToObjectsConverter = function(){
 			});
 
 			//Must reverse the array, as pushing makes last commit end up in front
-			console.log("Got markers from next: ", markersRetrievedFromNext)
-			console.log("States missong markers: ", filesMissingMarkers)
+			console.log("Got markers from next: ", markersRetrievedFromNext);
+			console.log("States missong markers: ", filesMissingMarkers);
 
-			console.log("Got tests from next: ", testsRetrievedFromNext)
-			console.log("States missong tests: ", filesMissingTests)
-			console.log("States containing tests: ",statesContainingTestsFiles);
+			console.log("Got tests from next: ", testsRetrievedFromNext);
+			console.log("States missong tests: ", filesMissingTests);
+			console.log("States containing tests: ", statesContainingTestsFiles);
 
 			console.log("Applying tests");
 
 			resolve({
 				states: states,
-				tests: testStore.getTests()
+				tests: testHandler.getTests()
 			});
 
 			} catch(e){
@@ -137,7 +140,7 @@ var GitFilesToObjectsConverter = function(){
 		if(testsFiles.length > 0){
 			statesContainingTestsFiles++;
 			testsFiles.forEach(function(file){
-				testStore.parseFile(file, commit.time);
+				testHandler.parseFile(file, commit.time);
 			});
 		} else {
 			filesMissingTests++;
@@ -176,104 +179,5 @@ var GitFilesToObjectsConverter = function(){
 
 
 
-var Markers = function(markersFile){
 
-	var markersPrFile = {};
-
-	var _constructor = function(markersFiles){
-
-		markersFiles.map(parseFiles);
-	};
-
-	var parseFiles= function(markersFile){
-
-		try{
-			if(markersFile.fileContents === undefined || markersFile.fileContents.length<1){return;}
-			var markers = JSON.parse(markersFile.fileContents);
-
-			if(markers === undefined || markers.listOfMarkers == undefined){return;}
-
-			var files = Object.keys(markers.listOfMarkers);
-
-			files.map(function(fileName){
-				if(markersPrFile[fileName] === undefined){
-					markersPrFile[fileName] = [];
-				}
-				var markerList = markers.listOfMarkers[fileName];
-				//type.check("Array<FileMarker>", markerList);
-				//Optional fields not supported in Typed yet
-				//Extend current array with new markers array
-				markersPrFile[fileName].push.apply(markersPrFile[fileName],markerList);
-			});
-
-		}catch(e){
-			if(e instanceof TypeError){
-				throw e;
-			}
-			console.log("Could not parse markers JSON");
-		}
-	};
-
-	var getMarkersForFile = function(file){
-		var name = "/"+file.name;
-		//console.log("Getting markers for file:",name,Object.keys(markersPrFile));
-
-		if(markersPrFile[name] !== undefined){
-		//	console.log("Got markres");
-			return markersPrFile[name];
-		}
-		return [];
-	};
-
-	_constructor(markersFile);
-
-	return {
-		getMarkersForFile: getMarkersForFile
-	};
-};
-
-var TestStore = function(){
-
-	var tests = [];
-
-	var parseFile = function(testsFile, timeStamp){
-
-		try{
-			if(testsFile === undefined || testsFile.fileContents.length < 1){return;}
-			var _tests = JSON.parse(testsFile.fileContents);
-			_tests.forEach(function(test){
-				type.check("FileTest", test);
-
-				var stateTest = type.create("StateTest");
-
-				stateTest.time = timeStamp;
-				stateTest.methodName = test.methodName;
-				stateTest.result = test.result;
-
-				//Assume all test classes end in Test
-				var seperatePackageAndClass = test.className.match(/^(\w+)\.(\w+)Test$/);
-				if(seperatePackageAndClass === null){
-					console.log("Not recognisable test:  "+test.className);
-					return;
-				}
-
-				stateTest.packageName = seperatePackageAndClass[1];
-				stateTest.contentName = seperatePackageAndClass[2];
-
-				tests.push(stateTest);
-			});
-		}catch(e){
-			if(e instanceof TypeError){
-				throw e;
-			}
-			console.log("Could not parse test JSON", testsFile);
-		}
-
-	};
-
-	return {
-		parseFile: parseFile,
-		getTests: function(){return tests;}
-	};
-};
 module.exports = new GitFilesToObjectsConverter();
