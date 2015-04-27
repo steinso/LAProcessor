@@ -99,7 +99,7 @@ app.post("/process", function(req, res){
 
 				res.send(JSON.stringify(returnedData));
 				timer.stop();
-				log.debug("Tests found: ", result.tests.length);
+				log.debug("Tests found: " + result.tests.length);
 				log.debug("SUCCESS: States analyzed in: " + timer.getLast());
 				log.print();
 			}, function(error){
