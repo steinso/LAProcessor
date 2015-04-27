@@ -174,7 +174,7 @@ var manualCategories = [
 			"interface": ["StringGrid"],
 			"class": ["StringGridImpl","StringGridIterator"]
 		}
-	},{
+	},{ //Oving 8
 		name: "Logger",
 		type: "Delegering",
 		package: "delegation",
@@ -196,9 +196,55 @@ var manualCategories = [
 		package: "patterns.patterns|patterns.observable",
 		files: {
 			"interface": ["HighScoreListListener"],
-			"class": ["HighScoreList","HighScoreListProgram"]
+			"class": ["HighScoreList", "HighScoreListProgram"]
+		}
+	}, {
+		name: "TheOffice",
+		type: "Delegering",
+		package: "delegation.office",
+		files: {
+			"interface": ["Employee"],
+			"class": ["Clerk", "Printer", "Manager"]
+		}
+	}, { //Oving 9
+		name: "CardContainerImpl",
+		type: "Arv",
+		package: "inheritance",
+		files: {
+			"class": ["CardContainerImpl", "CardDeck", "CardHand"]
+		}
+	}, {
+		name: "Train",
+		type: "Arv",
+		package: "inheritance",
+		files: {
+			"class": ["TrainCar", "CargoCar", "PassengerCar", "Train"]
+		}
+	}, { //Contains no tests
+		name: "Kalkulator",
+		type: "Arv",
+		package: "inheritance",
+		files: {
+			"class": ["SimpleCalculator", "RPNCaclulator"]
+		}
+	}, {
+		name: "SavingsAccount",
+		type: "Arv",
+		package: "inheritance",
+		files: {
+			"class": ["SavingsAccount", "BSU", "ForeldreSpar"]
+		}
+	}, {
+		name: "Asteroids",
+		type: "Arv",
+		package: "inheritance",
+		files: {
+			"class": ["SpaceObject", "Asteriod", "SpaceShip"]
 		}
 	}
+
+
+
 	/*
 	 {
 		name: "RPN Kalkulator",

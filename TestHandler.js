@@ -19,7 +19,7 @@ var TestHandler = function(){
 				stateTest.result = test.result;
 
 				//Assume all test classes end in Test
-				var seperatePackageAndClass = test.className.match(/^(\w+)\.(\w+)Test$/);
+				var seperatePackageAndClass = test.className.match(/^([\w|\.]+)\.(\w+)Test$/);
 				if(seperatePackageAndClass === null){
 					console.log("Not recognisable test:  "+test.className);
 					return;
