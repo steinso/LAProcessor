@@ -11,35 +11,35 @@ var manualCategories = [
 {
 		name: "Account",
 		type: "Tilstand og oppførsel",
-		package: "stateandbehavior",
+		package: "stateandbehavior|[Oo]ving0?1",
 		files: {
 			"class": ["Account"]
 		}
 	},{
 		name: "Location",
 		type: "Tilstand og oppførsel",
-		package: "stateandbehavior",
+		package: "stateandbehavior|[Oo]ving0?1",
 		files: {
 			"class": ["Location"]
 		}
 	},{
 		name: "UpOrDownCounter",
 		type: "Tilstand og oppførsel",
-		package: "stateandbehavior",
+		package: "stateandbehavior|[Oo]ving0?1",
 		files: {
 			"class": ["UpOrDownCounter"]
 		}
 	},{
 		name: "Rectangle",
 		type: "Tilstand og oppførsel",
-		package: "stateandbehavior",
+		package: "stateandbehavior|[Oo]ving0?1",
 		files: {
 			"class": ["Rectangle"]
 		}
 	},{
 		name: "LineEditor",
 		type: "Tilstand og oppførsel",
-		package: "stateandbehavior",
+		package: "stateandbehavior|[Oo]ving0?1",
 		files: {
 			"class": ["LineEditor"]
 		}
@@ -72,66 +72,66 @@ var manualCategories = [
 		files: {
 			"class": ["RPNCalc"]
 		}
-	},{
+	},{ //oving 4
 		name: "TicTacToe",
 		type: "Innkapsling",
-		package: "encapsulation",
+		package: "encapsulation|[Oo]ving0?4",
 		files: {
 			"class": ["TicTacToe"]
 		}
 	},{
 		name: "BattleShip",
 		type: "Innkapsling",
-		package: "encapsulation",
+		package: "encapsulation|[Oo]ving0?4",
 		files: {
 			"class": ["Battleship"] //Dette er en aapen oppgave
 		}
 	},{
 		name: "Sudoku",
 		type: "Innkapsling",
-		package: "encapsulation",
+		package: "encapsulation|[Oo]ving0?4",
 		files: {
 			"class": ["Sudoku"] // Dette er en aapoen oppgave
 		}
 	},{
 		name: "Sokoban",
 		type: "Innkapsling",
-		package: "encapsulation",
+		package: "encapsulation|[Oo]ving0?4",
 		files: {
 			"class": ["Sokoban"] // Dette er en aapoen oppgave
 		}
-	},{
+	},{ //oving 5
 		name: "Card",
 		type: "Objektstrukturer",
-		package: "objectstructures",
+		package: "objectstructures|[Oo]ving0?5",
 		files: {
 			"class": ["Card","CardDeck","CardHand"]
 		}
 	},{
 		name: "Partner",
 		type: "Objektstrukturer",
-		package: "objectstructures",
+		package: "objectstructures|[Oo]ving0?5",
 		files: {
 			"class": ["Partner"]
 		}
 	},{
 		name: "Twitter",
 		type: "Objektstrukturer",
-		package: "objectstructures",
+		package: "objectstructures|[Oo]ving0?5",
 		files: {
 			"class": ["Tweet","TwitterAccount"]
 		}
 	},{
 		name: "Person",
 		type: "Objektstrukturer",
-		package: "objectstructures",
+		package: "objectstructures|[Oo]ving0?5",
 		files: {
 			"class": ["Person"]
 		}
-	},{
+	},{ //oving 6
 		name: "CardContainer",
 		type: "Interface",
-		package: "interfaces",
+		package: "interfaces|[Oo]ving0?6",
 		files: {
 			"interface": ["CardContainer"],
 			"class": ["CardContainerIterator"]
@@ -139,7 +139,7 @@ var manualCategories = [
 	},{
 		name: "CardComparison",
 		type: "Interface",
-		package: "interfaces",
+		package: "interfaces|[Oo]ving0?6",
 		files: {
 			"interface": ["Comparable"],
 			"class": ["Card","CardComparator"]
@@ -147,14 +147,14 @@ var manualCategories = [
 	},{
 		name: "Sortering av TwitterAccount",
 		type: "Interface",
-		package: "interfaces",
+		package: "interfaces|[Oo]ving0?6",
 		files: {
 			"class": ["TwitterAccount","UserNameComparator","FollowersCountComparator","TweetsCountComparator"]
 		}
 	},{
 		name: "Named",
 		type: "Interface",
-		package: "interfaces",
+		package: "interfaces|[Oo]ving0?6",
 		files: {
 			"interface": ["Named"],
 			"class": ["Person1","Person2","NamedComparator"]
@@ -162,14 +162,14 @@ var manualCategories = [
 	},{
 		name: "BinaryComputingIterator",
 		type: "Interface",
-		package: "interfaces",
+		package: "interfaces|[Oo]ving0?6",
 		files: {
 			"class": ["BinaryComputingIterator"]
 		}
 	},{
 		name: "StringGrid",
 		type: "Interface",
-		package: "interfaces",
+		package: "interfaces|[Oo]ving0?6",
 		files: {
 			"interface": ["StringGrid"],
 			"class": ["StringGridImpl","StringGridIterator"]
@@ -177,7 +177,7 @@ var manualCategories = [
 	},{ //Oving 8
 		name: "Logger",
 		type: "Delegering",
-		package: "delegation",
+		package: "delegation|[Oo]ving0?8",
 		files: {
 			"interface": ["ILogger"],
 			"class": ["StreamLogger","FilteringLogger","DistributingLogger"]
@@ -185,7 +185,7 @@ var manualCategories = [
 	},{
 		name: "StockListener",
 		type: "Observatør-teknikken",
-		package: "patterns.patterns|patterns.observable",
+		package: "patterns.patterns|patterns.observable|[Oo]ving0?8",
 		files: {
 			"interface": ["StockListener"],
 			"class": ["SmartStock", "StockIndex", "Stock"]
@@ -193,7 +193,7 @@ var manualCategories = [
 	},{
 		name: "HighscoreList",
 		type: "Observatør-teknikken",
-		package: "patterns.patterns|patterns.observable",
+		package: "patterns.patterns|patterns.observable|[Oo]ving0?8",
 		files: {
 			"interface": ["HighScoreListListener"],
 			"class": ["HighScoreList", "HighScoreListProgram"]
@@ -201,7 +201,7 @@ var manualCategories = [
 	}, {
 		name: "TheOffice",
 		type: "Delegering",
-		package: "delegation.office",
+		package: "delegation.office|[Oo]ving0?8",
 		files: {
 			"interface": ["Employee"],
 			"class": ["Clerk", "Printer", "Manager"]
@@ -209,41 +209,39 @@ var manualCategories = [
 	}, { //Oving 9
 		name: "CardContainerImpl",
 		type: "Arv",
-		package: "inheritance",
+		package: "inheritance|[Oo]ving0?9",
 		files: {
 			"class": ["CardContainerImpl", "CardDeck", "CardHand"]
 		}
 	}, {
 		name: "Train",
 		type: "Arv",
-		package: "inheritance",
+		package: "inheritance|[Oo]ving0?9",
 		files: {
 			"class": ["TrainCar", "CargoCar", "PassengerCar", "Train"]
 		}
 	}, { //Contains no tests
 		name: "Kalkulator",
 		type: "Arv",
-		package: "inheritance",
+		package: "inheritance|[Oo]ving0?9",
 		files: {
 			"class": ["SimpleCalculator", "RPNCaclulator"]
 		}
 	}, {
 		name: "SavingsAccount",
 		type: "Arv",
-		package: "inheritance",
+		package: "inheritance|[Oo]ving0?9",
 		files: {
 			"class": ["SavingsAccount", "BSU", "ForeldreSpar"]
 		}
 	}, {
 		name: "Asteroids",
 		type: "Arv",
-		package: "inheritance",
+		package: "inheritance|[Oo]ving0?9",
 		files: {
 			"class": ["SpaceObject", "Asteriod", "SpaceShip"]
 		}
 	}
-
-
 
 	/*
 	 {
