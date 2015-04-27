@@ -88,8 +88,9 @@ app.post("/process", function(req, res){
 	var log = new Log("unknown", "Got process request: " + req.body.commits.length + " states");
 	var timer = Timer.create("Process");
 	timer.start();
+	var gitFilesToObjectsConverter = new GitFilesToObjectsConverter();
 
-		GitFilesToObjectsConverter.convert(commits).then(function(result){
+		gitFilesToObjectsConverter.convert(commits).then(function(result){
 			StateAnalytics.getAnalyticsOfStates(result.states).then(function(states){
 
 				var returnedData = {

@@ -25,8 +25,7 @@ var GitFilesToObjectsConverter = function(){
 
 		var convert = function(commits){
 		type.ofInput({"Array<Commit>": commits});
-
-				// Extends the input object
+		// Extends the input object
 		return new Promise(function(resolve, reject){
 			try{
 			var states = [];
