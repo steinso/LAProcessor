@@ -16,15 +16,16 @@ var MarkerHandler = require("./MarkerHandler.js");
 
 var GitFilesToObjectsConverter = function(){
 
-	var filesMissingMarkers = 0;
-	var markersRetrievedFromNext = 0;
-	var filesMissingTests = 0;
-	var testsRetrievedFromNext = 0;
-	var statesContainingTestsFiles = 0;
-	var testHandler = new TestHandler();
-
-	var convert = function(commits){
+		var convert = function(commits){
 		type.ofInput({"Array<Commit>": commits});
+
+		var filesMissingMarkers = 0;
+		var markersRetrievedFromNext = 0;
+		var filesMissingTests = 0;
+		var testsRetrievedFromNext = 0;
+		var statesContainingTestsFiles = 0;
+		var testHandler = new TestHandler();
+
 
 
 		// Extends the input object
