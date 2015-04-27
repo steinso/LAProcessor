@@ -43,10 +43,11 @@ app.get("/repoTimelapse/:clientId", function(req, res){
 	var clientId = req.params.clientId;
 	var log = new Log("Timelapse request for: " + clientId);
 	var Commits = gitConverter.getCommitsFromRepo("/srv/LAHelper/logs/" + clientId);
+	var gitFilesToObjectsConverter = new GitFilesToObjectsConverter();
 	//var Commits= gitConverter.getCommitsFromRepo("/srv/LAHelper/logs/78e6d96d44929f294d58d686dc07253416d748ec");
 	Commits.then(function(commits){
 		console.log(commits);
-		GitFilesToObjectsConverter.convert(commits).then(function(states){
+		gitFilesToObjectsConverter.convert(commits).then(function(states){
 			StateAnalytics.getAnalyticsOfStates(states).then(function(states){
 
 				var returnedData = JSON.stringify(states);

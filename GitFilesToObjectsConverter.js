@@ -16,19 +16,17 @@ var MarkerHandler = require("./MarkerHandler.js");
 
 var GitFilesToObjectsConverter = function(){
 
-		var convert = function(commits){
-		type.ofInput({"Array<Commit>": commits});
-
 		var filesMissingMarkers = 0;
-		var markersRetrievedFromNext = 0;
 		var filesMissingTests = 0;
+		var markersRetrievedFromNext = 0;
 		var testsRetrievedFromNext = 0;
 		var statesContainingTestsFiles = 0;
 		var testHandler = new TestHandler();
 
+		var convert = function(commits){
+		type.ofInput({"Array<Commit>": commits});
 
-
-		// Extends the input object
+				// Extends the input object
 		return new Promise(function(resolve, reject){
 			try{
 			var states = [];
@@ -181,4 +179,4 @@ var GitFilesToObjectsConverter = function(){
 
 
 
-module.exports = new GitFilesToObjectsConverter();
+module.exports = GitFilesToObjectsConverter;
