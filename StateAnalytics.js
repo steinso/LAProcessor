@@ -78,7 +78,7 @@ var StateAnalytics = function(){
 	};
 
 	var getPackageName = function(file){
-		var packageMatch = file.fileContents.match(/\s*package ([\w|\.]+);/);
+		var packageMatch = file.fileContents.match(/\s*package ([æ|ø|\w|\.]+);/);
 		var packageName = NOT_FOUND;
 
 		if(packageMatch !== null && packageMatch[1] !== null){
